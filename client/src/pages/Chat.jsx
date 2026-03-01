@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { db } from '../db'
 
 export default function Chat() {
@@ -48,6 +48,7 @@ export default function Chat() {
 
   return (
     <div>
+      <Link to="/">← Back</Link>
       <h1>{chat?.title ?? 'Loading...'}</h1>
 
       <div>
