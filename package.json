@@ -1,0 +1,11 @@
+{
+  "name": "ai-summary",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm install --prefix client && npm run build --prefix client && npm install --prefix server",
+    "start": "node server/index.js"
+  }
+}
