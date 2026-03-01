@@ -11,7 +11,14 @@ const { saveToDb, addOutputToChat } = require('./db')
 const app = express()
 
 // ── Security headers ──────────────────────────────────────────────
-app.use(helmet())
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'connect-src': ["'self'", 'https://api.instantdb.com', 'wss://api.instantdb.com'],
+    },
+  },
+}))
 
 // ── CORS ──────────────────────────────────────────────────────────
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173' }))
