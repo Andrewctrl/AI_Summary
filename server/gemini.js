@@ -22,7 +22,17 @@ async function generateContent(file, outputType) {
     : [prompt, { inlineData: { data: file.buffer.toString('base64'), mimeType: file.mimetype } }]
 
   const result = await model.generateContent(parts)
-  return JSON.parse(result.response.text())
+  const raw = result.response.text()
+
+  // Strip markdown code fences if the model included them despite instructions
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+
+  try {
+    return JSON.parse(cleaned)
+  } catch (err) {
+    console.error('Gemini returned invalid JSON:', cleaned.slice(0, 500))
+    throw new Error('AI returned malformed response. Please try again.')
+  }
 }
 
 module.exports = { generateContent }
