@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^1.43.0",
     "@google/generative-ai": "^0.24.1",
     "@instantdb/admin": "^0.22.148",
     "cors": "^2.8.6",
