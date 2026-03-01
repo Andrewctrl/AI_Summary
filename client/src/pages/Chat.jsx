@@ -36,7 +36,9 @@ export default function Chat() {
     setLoading(true)
     setError(null)
     try {
-      await fetch('/api/generate', { method: 'POST', body: formData })
+      const res = await fetch('/api/generate', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error()
+      setActiveType(type)
     } catch {
       setError('Generation failed. Please try again.')
     } finally {
