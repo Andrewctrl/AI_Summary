@@ -1,4 +1,5 @@
 require('dotenv').config()
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const multer = require('multer')
@@ -69,7 +70,7 @@ function validateBody(req, res, next) {
 }
 
 // ── Route ─────────────────────────────────────────────────────────
-app.post('/generate', upload.single('file'), validateBody, async (req, res) => {
+app.post('/api/generate', upload.single('file'), validateBody, async (req, res) => {
   const { outputType, userId, chatId } = req.body
 
   if (!req.file) {
@@ -111,6 +112,11 @@ app.post('/generate', upload.single('file'), validateBody, async (req, res) => {
   }
 })
 
+// ── Serve Vite build in production ───────────────────────────────
+const clientDist = path.join(__dirname, '../client/dist')
+app.use(express.static(clientDist))
+app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')))
+
 // ── Multer error handler ──────────────────────────────────────────
 app.use((err, _req, res, _next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
@@ -123,4 +129,5 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Something went wrong.' })
 })
 
-app.listen(3001, () => console.log('Server running at http://localhost:3001'))
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`))
