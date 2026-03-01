@@ -15,16 +15,32 @@ app.post('/generate', upload.single('file'), async (req, res) => {
   console.log('POST /generate — file:', req.file?.originalname, 'type:', outputType)
 
   try {
-    const result = await generateContent(req.file, outputType)
+    // Adding output to an existing chat — generate from the existing content
     if (chatId) {
+      const result = await generateContent(req.file, outputType)
       await addOutputToChat(chatId, result)
       return res.json(result)
     }
-    if (userId) {
-      const { chatId: newChatId } = await saveToDb(userId, result)
-      return res.json({ ...result, chatId: newChatId })
+
+    // New upload: always generate summary from the original file first
+    const summary = await generateContent(req.file, 'summary')
+
+    if (!userId) return res.json(summary)
+
+    const { chatId: newChatId } = await saveToDb(userId, summary)
+
+    // If the user asked for quiz or flashcards, generate it from the summary
+    if (outputType !== 'summary') {
+      const summaryFile = {
+        buffer: Buffer.from(JSON.stringify(summary)),
+        mimetype: 'text/plain',
+      }
+      const output = await generateContent(summaryFile, outputType)
+      await addOutputToChat(newChatId, output)
+      return res.json({ ...output, chatId: newChatId })
     }
-    res.json(result)
+
+    return res.json({ ...summary, chatId: newChatId })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Generation failed. Please try again.' })

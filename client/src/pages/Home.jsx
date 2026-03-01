@@ -94,7 +94,7 @@ export default function Home() {
       const res = await fetch('/api/generate', { method: 'POST', body: formData })
       const result = await res.json()
       if (!res.ok) throw new Error(result.error)
-      if (result.chatId) navigate(`/chat/${result.chatId}`)
+      if (result.chatId) navigate(`/chat/${result.chatId}`, { state: { initialTab: outputType } })
     } catch (err) {
       setError(err.message || 'Generation failed. Please try again.')
     } finally {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { db } from '../db'
 
 const TABS = ['summary', 'quiz', 'flashcards']
@@ -8,7 +8,8 @@ const LABELS = { summary: 'Summary', quiz: 'Quiz', flashcards: 'Flashcards' }
 export default function Chat() {
   const { id } = useParams()
   const { user } = db.useAuth()
-  const [activeType, setActiveType] = useState('summary')
+  const location = useLocation()
+  const [activeType, setActiveType] = useState(location.state?.initialTab || 'summary')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -24,13 +25,13 @@ export default function Chat() {
   const getOutput = (type) => outputs.find((o) => o.type === type)
 
   const handleGenerate = async (type) => {
-    const summary = getOutput('summary')
-    if (!summary) return
+    const source = getOutput('summary') || getOutput('quiz') || getOutput('flashcards')
+    if (!source) return
 
-    const summaryText = JSON.stringify(summary.content)
+    const sourceText = JSON.stringify(source.content)
     const formData = new FormData()
-    const textFile = new Blob([summaryText], { type: 'text/plain' })
-    formData.append('file', textFile, 'summary.txt')
+    const textFile = new Blob([sourceText], { type: 'text/plain' })
+    formData.append('file', textFile, 'source.txt')
     formData.append('outputType', type)
     if (user?.id) formData.append('userId', user.id)
     formData.append('chatId', id)
@@ -219,37 +220,61 @@ function QuizView({ content }) {
 
 /* ── Flashcards ── */
 function FlashcardsView({ content }) {
-  const [flipped, setFlipped] = useState(new Set())
+  const cards = content.cards ?? []
+  const [index, setIndex] = useState(0)
+  const [isFlipped, setIsFlipped] = useState(false)
 
-  const toggle = (i) => setFlipped((prev) => {
-    const next = new Set(prev)
-    next.has(i) ? next.delete(i) : next.add(i)
-    return next
-  })
+  const goTo = (i) => { setIndex(i); setIsFlipped(false) }
+  const prev = () => goTo(Math.max(0, index - 1))
+  const next = () => goTo(Math.min(cards.length - 1, index + 1))
+
+  const card = cards[index]
+  if (!card) return null
 
   return (
-    <div style={styles.cardsGrid}>
-      {content.cards?.map((card, i) => {
-        const isFlipped = flipped.has(i)
-        return (
-          <div
-            key={i}
-            onClick={() => toggle(i)}
-            style={styles.flashcard}
-          >
-            <div style={{ ...styles.flashcardInner, ...(isFlipped ? styles.flashcardFlipped : {}) }}>
-              <div style={styles.flashcardFront}>
-                <span style={styles.flashcardHint}>FRONT</span>
-                <p style={styles.flashcardText}>{card.front}</p>
-              </div>
-              <div style={styles.flashcardBack}>
-                <span style={styles.flashcardHint}>BACK</span>
-                <p style={styles.flashcardText}>{card.back}</p>
-              </div>
+    <div style={styles.fcWrap}>
+      <span style={styles.fcCounter}>{index + 1} / {cards.length}</span>
+
+      <div style={styles.fcRow}>
+        <button
+          onClick={prev}
+          disabled={index === 0}
+          style={{ ...styles.fcNavBtn, ...(index === 0 ? styles.fcNavBtnDisabled : {}) }}
+        >←</button>
+
+        <div style={styles.fcCard} onClick={() => setIsFlipped(!isFlipped)}>
+          <div style={{ ...styles.fcInner, ...(isFlipped ? styles.fcFlipped : {}) }}>
+            <div style={styles.fcFront}>
+              <span style={styles.fcSideLabel}>QUESTION</span>
+              <p style={styles.fcText}>{card.front}</p>
+            </div>
+            <div style={styles.fcBack}>
+              <span style={styles.fcSideLabel}>ANSWER</span>
+              <p style={styles.fcText}>{card.back}</p>
             </div>
           </div>
-        )
-      })}
+        </div>
+
+        <button
+          onClick={next}
+          disabled={index === cards.length - 1}
+          style={{ ...styles.fcNavBtn, ...(index === cards.length - 1 ? styles.fcNavBtnDisabled : {}) }}
+        >→</button>
+      </div>
+
+      <p style={styles.fcHint}>Click card to flip</p>
+
+      {cards.length <= 20 && (
+        <div style={styles.fcDots}>
+          {cards.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              style={{ ...styles.fcDot, ...(i === index ? styles.fcDotActive : {}) }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -523,65 +548,127 @@ const styles = {
   },
 
   /* Flashcards */
-  cardsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-    gap: '14px',
+  fcWrap: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '20px',
   },
-  flashcard: {
-    height: '160px',
+  fcCounter: {
+    fontSize: '13px',
+    color: '#555',
+    fontWeight: 500,
+  },
+  fcRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    width: '100%',
+  },
+  fcNavBtn: {
+    flexShrink: 0,
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    border: '1px solid #2e2e2e',
+    background: '#1a1a1a',
+    color: '#ccc',
+    fontSize: '18px',
     cursor: 'pointer',
-    perspective: '1000px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.15s',
   },
-  flashcardInner: {
+  fcNavBtnDisabled: {
+    opacity: 0.2,
+    cursor: 'not-allowed',
+  },
+  fcCard: {
+    flex: 1,
+    height: '260px',
+    cursor: 'pointer',
+    perspective: '1200px',
+  },
+  fcInner: {
     position: 'relative',
     width: '100%',
     height: '100%',
-    transition: 'transform 0.45s',
+    transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1)',
     transformStyle: 'preserve-3d',
   },
-  flashcardFlipped: {
+  fcFlipped: {
     transform: 'rotateY(180deg)',
   },
-  flashcardFront: {
+  fcFront: {
     position: 'absolute',
     inset: 0,
     background: '#1a1a1a',
     border: '1px solid #2a2a2a',
-    borderRadius: '12px',
-    padding: '16px',
+    borderRadius: '16px',
+    padding: '32px',
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'center',
     justifyContent: 'center',
+    textAlign: 'center',
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
   },
-  flashcardBack: {
+  fcBack: {
     position: 'absolute',
     inset: 0,
     background: '#1e1e2e',
-    border: '1px solid rgba(99,102,241,0.3)',
-    borderRadius: '12px',
-    padding: '16px',
+    border: '1px solid rgba(99,102,241,0.35)',
+    borderRadius: '16px',
+    padding: '32px',
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'center',
     justifyContent: 'center',
+    textAlign: 'center',
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
     transform: 'rotateY(180deg)',
   },
-  flashcardHint: {
+  fcSideLabel: {
     fontSize: '10px',
     fontWeight: 700,
-    letterSpacing: '0.1em',
+    letterSpacing: '0.12em',
     color: '#444',
-    marginBottom: '8px',
+    marginBottom: '16px',
+    display: 'block',
   },
-  flashcardText: {
+  fcText: {
     margin: 0,
-    fontSize: '14px',
+    fontSize: '17px',
     fontWeight: 500,
-    color: '#ddd',
-    lineHeight: 1.5,
+    color: '#e0e0e0',
+    lineHeight: 1.55,
+  },
+  fcHint: {
+    margin: 0,
+    fontSize: '12px',
+    color: '#3a3a3a',
+  },
+  fcDots: {
+    display: 'flex',
+    gap: '6px',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    maxWidth: '400px',
+  },
+  fcDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    border: 'none',
+    background: '#2e2e2e',
+    cursor: 'pointer',
+    padding: 0,
+    transition: 'background 0.15s',
+  },
+  fcDotActive: {
+    background: '#6366f1',
   },
 }
