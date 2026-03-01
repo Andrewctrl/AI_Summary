@@ -36,6 +36,7 @@ export default function Home() {
   const [error, setError] = useState(null)
   const [selectedFile, setSelectedFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
+  const [confirmId, setConfirmId] = useState(null)
   const fileInputRef = useRef(null)
 
   const { data } = db.useQuery({
@@ -45,8 +46,19 @@ export default function Home() {
         order: { createdAt: 'desc' },
         limit: 5,
       },
+      outputs: {},
     },
   })
+
+  const handleDelete = (e, chat) => {
+    e.stopPropagation()
+    const outputIds = chat.outputs?.map((o) => o.id) ?? []
+    db.transact([
+      db.tx.chats[chat.id].delete(),
+      ...outputIds.map((oid) => db.tx.outputs[oid].delete()),
+    ])
+    setConfirmId(null)
+  }
 
   const handleFileChange = (file) => {
     if (file) setSelectedFile(file)
@@ -184,22 +196,39 @@ export default function Home() {
             <p style={styles.empty}>No sessions yet. Upload a file to get started.</p>
           )}
           <div style={styles.sessionList}>
-            {data?.chats?.map((chat) => (
-              <div
-                key={chat.id}
-                style={styles.sessionCard}
-                onClick={() => navigate(`/chat/${chat.id}`)}
-                onMouseEnter={(e) => Object.assign(e.currentTarget.style, styles.sessionCardHover)}
-                onMouseLeave={(e) => Object.assign(e.currentTarget.style, styles.sessionCard)}
-              >
-                <span style={styles.sessionIcon}>{getSourceIcon(chat.sourceType)}</span>
-                <div style={styles.sessionInfo}>
-                  <p style={styles.sessionTitle}>{chat.title}</p>
-                  <p style={styles.sessionMeta}>{chat.sourceType}</p>
+            {data?.chats?.map((chat) => {
+              const confirming = confirmId === chat.id
+              return (
+                <div
+                  key={chat.id}
+                  style={confirming ? { ...styles.sessionCard, ...styles.sessionCardConfirm } : styles.sessionCard}
+                  onClick={() => !confirming && navigate(`/chat/${chat.id}`)}
+                  onMouseEnter={(e) => !confirming && Object.assign(e.currentTarget.style, styles.sessionCardHover)}
+                  onMouseLeave={(e) => !confirming && Object.assign(e.currentTarget.style, styles.sessionCard)}
+                >
+                  <span style={styles.sessionIcon}>{getSourceIcon(chat.sourceType)}</span>
+                  <div style={styles.sessionInfo}>
+                    <p style={styles.sessionTitle}>{chat.title}</p>
+                    <p style={styles.sessionMeta}>{chat.sourceType}</p>
+                  </div>
+                  {confirming ? (
+                    <div style={styles.confirmRow} onClick={(e) => e.stopPropagation()}>
+                      <span style={styles.confirmLabel}>Delete?</span>
+                      <button style={styles.confirmBtn} onClick={(e) => handleDelete(e, chat)}>Yes</button>
+                      <button style={styles.cancelBtn} onClick={() => setConfirmId(null)}>No</button>
+                    </div>
+                  ) : (
+                    <button
+                      style={styles.deleteBtn}
+                      onClick={(e) => { e.stopPropagation(); setConfirmId(chat.id) }}
+                      title="Delete session"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
-                <span style={styles.sessionArrow}>→</span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
@@ -436,5 +465,53 @@ const styles = {
     color: '#444',
     fontSize: '16px',
     flexShrink: 0,
+  },
+  sessionCardConfirm: {
+    background: 'rgba(239,68,68,0.06)',
+    borderColor: 'rgba(239,68,68,0.25)',
+    cursor: 'default',
+  },
+  deleteBtn: {
+    flexShrink: 0,
+    background: 'none',
+    border: 'none',
+    color: '#444',
+    fontSize: '14px',
+    cursor: 'pointer',
+    padding: '4px 6px',
+    borderRadius: '6px',
+    lineHeight: 1,
+    transition: 'color 0.15s',
+  },
+  confirmRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexShrink: 0,
+  },
+  confirmLabel: {
+    fontSize: '13px',
+    color: '#f87171',
+    fontWeight: 500,
+  },
+  confirmBtn: {
+    padding: '4px 10px',
+    background: 'rgba(239,68,68,0.15)',
+    border: '1px solid rgba(239,68,68,0.3)',
+    borderRadius: '6px',
+    color: '#f87171',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  cancelBtn: {
+    padding: '4px 10px',
+    background: '#2a2a2a',
+    border: '1px solid #3a3a3a',
+    borderRadius: '6px',
+    color: '#888',
+    fontSize: '12px',
+    fontWeight: 600,
+    cursor: 'pointer',
   },
 }
