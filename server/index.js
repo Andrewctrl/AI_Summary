@@ -115,7 +115,7 @@ app.post('/api/generate', upload.single('file'), validateBody, async (req, res) 
 // ── Serve Vite build in production ───────────────────────────────
 const clientDist = path.join(__dirname, '../client/dist')
 app.use(express.static(clientDist))
-app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')))
+app.get('/{*splat}', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')))
 
 // ── Multer error handler ──────────────────────────────────────────
 app.use((err, _req, res, _next) => {
