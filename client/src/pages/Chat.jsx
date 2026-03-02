@@ -52,12 +52,11 @@ export default function Chat() {
 
   const handleRegenerate = async () => {
     const existing = getOutput('quiz')
+    const source = getOutput('summary') || getOutput('flashcards')
+    if (!source) return
     setRegenLoading(true)
     setError(null)
     try {
-      if (existing) await db.transact(db.tx.outputs[existing.id].delete())
-      const source = getOutput('summary') || getOutput('flashcards')
-      if (!source) return
       const formData = new FormData()
       formData.append('file', new Blob([JSON.stringify(source.content)], { type: 'text/plain' }), 'source.txt')
       formData.append('outputType', 'quiz')
@@ -65,6 +64,8 @@ export default function Chat() {
       formData.append('chatId', id)
       const res = await fetch('/api/generate', { method: 'POST', body: formData })
       if (!res.ok) throw new Error()
+      // Delete old AFTER new is saved — no blank gap
+      if (existing) await db.transact(db.tx.outputs[existing.id].delete())
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
       setError('Regeneration failed. Please try again.')
