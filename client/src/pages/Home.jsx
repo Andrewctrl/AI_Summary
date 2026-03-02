@@ -50,7 +50,7 @@ export default function Home() {
       $: {
         where: { '$user.id': user.id },
         order: { createdAt: 'desc' },
-        limit: 6,           // fetch one extra to detect next page
+        limit: 6,
         offset: page * 5,
       },
       outputs: {},
@@ -81,7 +81,6 @@ export default function Home() {
     const file = e.dataTransfer.files[0]
     if (file) {
       setSelectedFile(file)
-      // sync to the hidden input
       const dt = new DataTransfer()
       dt.items.add(file)
       fileInputRef.current.files = dt.files
@@ -116,18 +115,19 @@ export default function Home() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
+
         {/* Header */}
         <div style={styles.header}>
           <div>
-            <h1 style={styles.title}>Notes AI</h1>
-            <p style={styles.subtitle}>Upload a file and get instant summaries, quizzes, or flashcards</p>
+            <h1 style={styles.title}>🧠 Cramly</h1>
+            <p style={styles.subtitle}>Turn any file into something you can actually study</p>
           </div>
           <button onClick={handleLogout} style={styles.logoutBtn}>Log out</button>
         </div>
 
         {/* Upload card */}
         <div style={styles.card}>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} style={styles.form}>
             {/* Output type pills */}
             <div style={styles.pillRow}>
               {OUTPUT_TYPES.map((type) => (
@@ -265,6 +265,7 @@ export default function Home() {
             </div>
           )}
         </div>
+
       </div>
     </div>
   )
@@ -273,7 +274,7 @@ export default function Home() {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: '#0f0f0f',
+    background: 'linear-gradient(160deg, #E8EAF6 0%, #E3F2FD 50%, #FFF8E8 100%)',
     padding: '40px 16px 80px',
   },
   container: {
@@ -281,46 +282,47 @@ const styles = {
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: '32px',
+    gap: '28px',
   },
   header: {
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    textAlign: 'left',
   },
   logoutBtn: {
     flexShrink: 0,
-    padding: '6px 14px',
+    padding: '7px 16px',
     borderRadius: '999px',
-    border: '1px solid #2a2a2a',
+    border: '1.5px solid #C5CAE9',
     background: 'transparent',
-    color: '#666',
+    color: '#7986CB',
     fontSize: '13px',
-    fontWeight: 500,
+    fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.15s',
   },
   title: {
-    margin: '0 0 8px',
-    fontSize: '32px',
+    margin: '0 0 4px',
+    fontSize: '30px',
     fontWeight: 700,
-    letterSpacing: '-0.5px',
-    color: '#fff',
+    color: '#3D405B',
+    letterSpacing: '-0.3px',
   },
   subtitle: {
     margin: 0,
-    fontSize: '15px',
-    color: '#888',
+    fontSize: '14px',
+    color: '#7B8099',
   },
   card: {
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
-    borderRadius: '16px',
+    background: '#FFFFFF',
+    borderRadius: '20px',
     padding: '24px',
+    boxShadow: '0 4px 24px rgba(100,110,180,0.10)',
+  },
+  form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '20px',
+    gap: '16px',
   },
   pillRow: {
     display: 'flex',
@@ -332,19 +334,19 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     fontSize: '14px',
-    fontWeight: 500,
+    fontWeight: 600,
     transition: 'all 0.15s',
   },
   pillActive: {
-    background: '#6366f1',
+    background: '#7986CB',
     color: '#fff',
   },
   pillInactive: {
-    background: '#2a2a2a',
-    color: '#aaa',
+    background: '#EEF0FB',
+    color: '#7B8099',
   },
   dropZone: {
-    border: '2px dashed #2e2e2e',
+    border: '2px dashed #C5CAE9',
     borderRadius: '12px',
     padding: '32px 24px',
     cursor: 'pointer',
@@ -352,14 +354,16 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    background: '#FAFBFF',
   },
   dropZoneActive: {
-    borderColor: '#6366f1',
-    background: 'rgba(99, 102, 241, 0.06)',
+    borderColor: '#7986CB',
+    background: 'rgba(121,134,203,0.06)',
   },
   dropZoneSelected: {
-    borderColor: '#3f3f3f',
+    borderColor: '#9FA8DA',
     borderStyle: 'solid',
+    background: '#FAFBFF',
   },
   dropPrompt: {
     textAlign: 'center',
@@ -369,17 +373,18 @@ const styles = {
     fontSize: '28px',
     display: 'block',
     marginBottom: '8px',
-    color: '#555',
+    color: '#9FA8DA',
   },
   dropText: {
     margin: '0 0 4px',
     fontSize: '14px',
-    color: '#ccc',
+    color: '#3D405B',
+    fontWeight: 500,
   },
   dropHint: {
     margin: 0,
     fontSize: '12px',
-    color: '#555',
+    color: '#9FA8DA',
   },
   filePreview: {
     display: 'flex',
@@ -394,35 +399,36 @@ const styles = {
   fileName: {
     margin: '0 0 2px',
     fontSize: '14px',
-    fontWeight: 500,
-    color: '#e8e8e8',
+    fontWeight: 600,
+    color: '#3D405B',
     wordBreak: 'break-all',
   },
   fileSize: {
     margin: 0,
     fontSize: '12px',
-    color: '#666',
+    color: '#9FA8DA',
   },
   error: {
-    margin: '4px 0 0',
+    margin: 0,
     padding: '10px 14px',
-    background: 'rgba(239,68,68,0.1)',
-    border: '1px solid rgba(239,68,68,0.25)',
+    background: 'rgba(239,100,100,0.08)',
+    border: '1px solid rgba(239,100,100,0.2)',
     borderRadius: '8px',
-    color: '#f87171',
+    color: '#C0392B',
     fontSize: '13px',
   },
   generateBtn: {
     width: '100%',
     padding: '13px',
-    background: '#6366f1',
+    background: '#7986CB',
     color: '#fff',
     border: 'none',
-    borderRadius: '10px',
+    borderRadius: '12px',
     fontSize: '15px',
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: 'pointer',
     transition: 'opacity 0.15s',
+    letterSpacing: '0.01em',
   },
   generateBtnDisabled: {
     opacity: 0.45,
@@ -438,7 +444,7 @@ const styles = {
     display: 'inline-block',
     width: '14px',
     height: '14px',
-    border: '2px solid rgba(255,255,255,0.3)',
+    border: '2px solid rgba(255,255,255,0.35)',
     borderTopColor: '#fff',
     borderRadius: '50%',
     animation: 'spin 0.7s linear infinite',
@@ -446,19 +452,19 @@ const styles = {
   section: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '10px',
   },
   sectionTitle: {
     margin: 0,
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#666',
+    fontSize: '12px',
+    fontWeight: 700,
+    color: '#9FA8DA',
     textTransform: 'uppercase',
-    letterSpacing: '0.06em',
+    letterSpacing: '0.08em',
   },
   empty: {
     margin: 0,
-    color: '#555',
+    color: '#9FA8DA',
     fontSize: '14px',
   },
   sessionList: {
@@ -471,22 +477,24 @@ const styles = {
     alignItems: 'center',
     gap: '14px',
     padding: '14px 16px',
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
-    borderRadius: '12px',
+    background: '#FFFFFF',
+    border: '1.5px solid #E8EAF6',
+    borderRadius: '14px',
     cursor: 'pointer',
-    transition: 'border-color 0.15s, background 0.15s',
+    transition: 'border-color 0.15s, box-shadow 0.15s',
+    boxShadow: '0 2px 8px rgba(100,110,180,0.06)',
   },
   sessionCardHover: {
     display: 'flex',
     alignItems: 'center',
     gap: '14px',
     padding: '14px 16px',
-    background: '#212121',
-    border: '1px solid #3a3a3a',
-    borderRadius: '12px',
+    background: '#FFFFFF',
+    border: '1.5px solid #9FA8DA',
+    borderRadius: '14px',
     cursor: 'pointer',
-    transition: 'border-color 0.15s, background 0.15s',
+    transition: 'border-color 0.15s, box-shadow 0.15s',
+    boxShadow: '0 4px 16px rgba(100,110,180,0.12)',
   },
   sessionIcon: {
     fontSize: '22px',
@@ -499,8 +507,8 @@ const styles = {
   sessionTitle: {
     margin: '0 0 2px',
     fontSize: '14px',
-    fontWeight: 500,
-    color: '#e0e0e0',
+    fontWeight: 600,
+    color: '#3D405B',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -508,23 +516,19 @@ const styles = {
   sessionMeta: {
     margin: 0,
     fontSize: '12px',
-    color: '#555',
-  },
-  sessionArrow: {
-    color: '#444',
-    fontSize: '16px',
-    flexShrink: 0,
+    color: '#9FA8DA',
   },
   sessionCardConfirm: {
-    background: 'rgba(239,68,68,0.06)',
-    borderColor: 'rgba(239,68,68,0.25)',
+    background: 'rgba(239,100,100,0.05)',
+    borderColor: 'rgba(239,100,100,0.25)',
     cursor: 'default',
+    boxShadow: 'none',
   },
   deleteBtn: {
     flexShrink: 0,
     background: 'none',
     border: 'none',
-    color: '#444',
+    color: '#C5CAE9',
     fontSize: '14px',
     cursor: 'pointer',
     padding: '4px 6px',
@@ -540,52 +544,53 @@ const styles = {
   },
   confirmLabel: {
     fontSize: '13px',
-    color: '#f87171',
-    fontWeight: 500,
+    color: '#C0392B',
+    fontWeight: 600,
   },
   confirmBtn: {
     padding: '4px 10px',
-    background: 'rgba(239,68,68,0.15)',
-    border: '1px solid rgba(239,68,68,0.3)',
+    background: 'rgba(239,100,100,0.1)',
+    border: '1px solid rgba(239,100,100,0.25)',
     borderRadius: '6px',
-    color: '#f87171',
+    color: '#C0392B',
     fontSize: '12px',
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: 'pointer',
   },
   cancelBtn: {
     padding: '4px 10px',
-    background: '#2a2a2a',
-    border: '1px solid #3a3a3a',
+    background: '#EEF0FB',
+    border: '1px solid #C5CAE9',
     borderRadius: '6px',
-    color: '#888',
+    color: '#7B8099',
     fontSize: '12px',
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: 'pointer',
   },
   pagination: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: '8px',
+    paddingTop: '4px',
   },
   pageBtn: {
-    padding: '6px 14px',
+    padding: '6px 16px',
     borderRadius: '999px',
-    border: '1px solid #2a2a2a',
-    background: '#1a1a1a',
-    color: '#aaa',
+    border: '1.5px solid #C5CAE9',
+    background: '#FFFFFF',
+    color: '#7986CB',
     fontSize: '13px',
-    fontWeight: 500,
+    fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.15s',
   },
   pageBtnDisabled: {
-    opacity: 0.3,
+    opacity: 0.35,
     cursor: 'not-allowed',
   },
   pageNum: {
     fontSize: '13px',
-    color: '#555',
+    color: '#9FA8DA',
+    fontWeight: 500,
   },
 }

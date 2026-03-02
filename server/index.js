@@ -16,6 +16,8 @@ app.use(helmet({
     directives: {
       ...helmet.contentSecurityPolicy.getDefaultDirectives(),
       'connect-src': ["'self'", 'https://api.instantdb.com', 'wss://api.instantdb.com'],
+      'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      'font-src': ["'self'", 'https://fonts.gstatic.com'],
     },
   },
 }))

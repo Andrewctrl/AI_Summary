@@ -106,7 +106,7 @@ export default function Chat() {
                   : exists
                     ? LABELS[type]
                     : `+ ${LABELS[type]}`}
-                {exists && <span style={styles.tabDot} />}
+                {exists && <span style={{ ...styles.tabDot, background: isActive ? 'rgba(255,255,255,0.7)' : '#7986CB' }} />}
               </button>
             )
           })}
@@ -201,7 +201,7 @@ function QuizView({ content, onRegenerate, regenLoading }) {
         )}
       </div>
 
-      <div style={regenLoading ? styles.quizFreezeOverlay : undefined}>
+      <div style={{ ...styles.quizContent, ...(regenLoading ? styles.quizFreezeOverlay : {}) }}>
       {Object.keys(answers).length === content.questions?.length && (
         <div style={styles.scoreBox}>
           <span style={styles.scoreText}>
@@ -323,7 +323,7 @@ function FlashcardsView({ content }) {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: '#0f0f0f',
+    background: 'linear-gradient(160deg, #E8EAF6 0%, #E3F2FD 50%, #FFF8E8 100%)',
     padding: '32px 16px 80px',
   },
   container: {
@@ -338,16 +338,17 @@ const styles = {
     alignItems: 'center',
   },
   backLink: {
-    color: '#666',
+    color: '#7B8099',
     fontSize: '14px',
     fontWeight: 500,
     transition: 'color 0.15s',
+    textDecoration: 'none',
   },
   title: {
     margin: 0,
     fontSize: '26px',
     fontWeight: 700,
-    color: '#fff',
+    color: '#3D405B',
     letterSpacing: '-0.3px',
     lineHeight: 1.3,
   },
@@ -362,17 +363,17 @@ const styles = {
     gap: '6px',
     padding: '8px 16px',
     borderRadius: '999px',
-    border: '1px solid #2a2a2a',
-    background: '#1a1a1a',
-    color: '#aaa',
+    border: '1.5px solid #DDE0F0',
+    background: '#FFFFFF',
+    color: '#7B8099',
     fontSize: '14px',
     fontWeight: 500,
     cursor: 'pointer',
     transition: 'all 0.15s',
   },
   tabActive: {
-    background: '#6366f1',
-    borderColor: '#6366f1',
+    background: '#7986CB',
+    borderColor: '#7986CB',
     color: '#fff',
   },
   tabDisabled: {
@@ -384,15 +385,15 @@ const styles = {
     width: '6px',
     height: '6px',
     borderRadius: '50%',
-    background: 'rgba(255,255,255,0.4)',
+    background: 'rgba(255,255,255,0.6)',
   },
   error: {
     margin: 0,
     padding: '10px 14px',
-    background: 'rgba(239,68,68,0.1)',
-    border: '1px solid rgba(239,68,68,0.25)',
+    background: 'rgba(239,100,100,0.08)',
+    border: '1px solid rgba(239,100,100,0.2)',
     borderRadius: '8px',
-    color: '#f87171',
+    color: '#C0392B',
     fontSize: '13px',
   },
   content: {
@@ -405,12 +406,12 @@ const styles = {
   emptyText: {
     margin: '0 0 6px',
     fontSize: '16px',
-    color: '#555',
+    color: '#7B8099',
   },
   emptyHint: {
     margin: 0,
     fontSize: '13px',
-    color: '#3f3f3f',
+    color: '#B0B4C8',
   },
 
   /* Summary */
@@ -420,8 +421,8 @@ const styles = {
     gap: '20px',
   },
   tldrBox: {
-    background: 'rgba(99,102,241,0.1)',
-    border: '1px solid rgba(99,102,241,0.25)',
+    background: 'rgba(121,134,203,0.08)',
+    border: '1px solid rgba(121,134,203,0.25)',
     borderRadius: '12px',
     padding: '16px 20px',
   },
@@ -430,34 +431,34 @@ const styles = {
     fontSize: '11px',
     fontWeight: 700,
     letterSpacing: '0.1em',
-    color: '#818cf8',
+    color: '#7986CB',
     marginBottom: '6px',
   },
   tldrText: {
     margin: 0,
     fontSize: '15px',
-    color: '#d0d0d0',
+    color: '#3D405B',
     lineHeight: 1.6,
   },
   section: {
-    borderLeft: '2px solid #2a2a2a',
+    borderLeft: '2px solid #DDE0F0',
     paddingLeft: '16px',
   },
   sectionHeading: {
     margin: '0 0 8px',
     fontSize: '15px',
     fontWeight: 600,
-    color: '#e0e0e0',
+    color: '#3D405B',
   },
   sectionContent: {
     margin: 0,
     fontSize: '14px',
-    color: '#999',
+    color: '#7B8099',
     lineHeight: 1.65,
   },
   keyPointsBox: {
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#F5F6FA',
+    border: '1.5px solid #DDE0F0',
     borderRadius: '12px',
     padding: '16px 20px',
   },
@@ -465,7 +466,7 @@ const styles = {
     margin: '0 0 12px',
     fontSize: '12px',
     fontWeight: 600,
-    color: '#666',
+    color: '#9199B0',
     textTransform: 'uppercase',
     letterSpacing: '0.06em',
   },
@@ -478,7 +479,7 @@ const styles = {
   },
   keyPoint: {
     fontSize: '14px',
-    color: '#ccc',
+    color: '#3D405B',
     lineHeight: 1.5,
   },
 
@@ -491,8 +492,8 @@ const styles = {
   },
   modeToggle: {
     display: 'flex',
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#EEF0F8',
+    border: '1.5px solid #DDE0F0',
     borderRadius: '999px',
     padding: '3px',
     gap: '2px',
@@ -502,22 +503,23 @@ const styles = {
     borderRadius: '999px',
     border: 'none',
     background: 'transparent',
-    color: '#666',
+    color: '#7B8099',
     fontSize: '13px',
     fontWeight: 500,
     cursor: 'pointer',
     transition: 'all 0.15s',
   },
   modeBtnActive: {
-    background: '#2a2a2a',
-    color: '#e0e0e0',
+    background: '#FFFFFF',
+    color: '#3D405B',
+    boxShadow: '0 1px 4px rgba(100,110,180,0.12)',
   },
   regenBtn: {
     padding: '6px 14px',
     borderRadius: '999px',
-    border: '1px solid #2a2a2a',
-    background: '#1a1a1a',
-    color: '#aaa',
+    border: '1.5px solid #DDE0F0',
+    background: '#FFFFFF',
+    color: '#7B8099',
     fontSize: '13px',
     fontWeight: 500,
     cursor: 'pointer',
@@ -526,7 +528,12 @@ const styles = {
   quizWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '24px',
+  },
+  quizContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '24px',
   },
   quizFreezeOverlay: {
     opacity: 0.4,
@@ -535,68 +542,69 @@ const styles = {
   },
   scoreBox: {
     padding: '12px 20px',
-    background: 'rgba(99,102,241,0.1)',
-    border: '1px solid rgba(99,102,241,0.25)',
+    background: 'rgba(121,134,203,0.08)',
+    border: '1px solid rgba(121,134,203,0.25)',
     borderRadius: '10px',
     textAlign: 'center',
   },
   scoreText: {
     fontSize: '16px',
     fontWeight: 600,
-    color: '#818cf8',
+    color: '#7986CB',
   },
   questionCard: {
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#FFFFFF',
+    border: '1.5px solid #E8EAF6',
     borderRadius: '12px',
-    padding: '20px',
+    padding: '24px',
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '16px',
+    boxShadow: '0 2px 12px rgba(100,110,180,0.07)',
   },
   questionNum: {
     margin: 0,
     fontSize: '11px',
     fontWeight: 600,
     letterSpacing: '0.08em',
-    color: '#555',
+    color: '#9199B0',
     textTransform: 'uppercase',
   },
   questionText: {
     margin: 0,
     fontSize: '15px',
     fontWeight: 500,
-    color: '#e0e0e0',
+    color: '#3D405B',
     lineHeight: 1.5,
   },
   optionList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '10px',
   },
   option: {
     display: 'flex',
     alignItems: 'center',
     gap: '10px',
     padding: '10px 14px',
-    background: '#232323',
-    border: '1px solid #2e2e2e',
+    background: '#F5F6FA',
+    border: '1.5px solid #DDE0F0',
     borderRadius: '8px',
-    color: '#ccc',
+    color: '#3D405B',
     fontSize: '14px',
     cursor: 'pointer',
     textAlign: 'left',
     transition: 'all 0.15s',
   },
   optionCorrect: {
-    background: 'rgba(34,197,94,0.1)',
-    borderColor: 'rgba(34,197,94,0.4)',
-    color: '#86efac',
+    background: 'rgba(34,197,94,0.08)',
+    borderColor: 'rgba(34,197,94,0.35)',
+    color: '#166534',
   },
   optionWrong: {
-    background: 'rgba(239,68,68,0.1)',
-    borderColor: 'rgba(239,68,68,0.4)',
-    color: '#fca5a5',
+    background: 'rgba(239,68,68,0.08)',
+    borderColor: 'rgba(239,68,68,0.35)',
+    color: '#991B1B',
   },
   optionDimmed: {
     opacity: 0.4,
@@ -605,17 +613,17 @@ const styles = {
   optionLetter: {
     flexShrink: 0,
     fontWeight: 700,
-    color: '#555',
+    color: '#9199B0',
     width: '16px',
   },
   checkmark: {
     marginLeft: 'auto',
-    color: '#4ade80',
+    color: '#16a34a',
     fontWeight: 700,
   },
   cross: {
     marginLeft: 'auto',
-    color: '#f87171',
+    color: '#dc2626',
     fontWeight: 700,
   },
   explanation: {
@@ -625,12 +633,12 @@ const styles = {
     lineHeight: 1.5,
   },
   explanationCorrect: {
-    background: 'rgba(34,197,94,0.08)',
-    color: '#86efac',
+    background: 'rgba(34,197,94,0.07)',
+    color: '#166534',
   },
   explanationWrong: {
-    background: 'rgba(239,68,68,0.08)',
-    color: '#fca5a5',
+    background: 'rgba(239,68,68,0.07)',
+    color: '#991B1B',
   },
 
   /* Flashcards */
@@ -642,7 +650,7 @@ const styles = {
   },
   fcCounter: {
     fontSize: '13px',
-    color: '#555',
+    color: '#9199B0',
     fontWeight: 500,
   },
   fcRow: {
@@ -656,18 +664,19 @@ const styles = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    border: '1px solid #2e2e2e',
-    background: '#1a1a1a',
-    color: '#ccc',
+    border: '1.5px solid #DDE0F0',
+    background: '#FFFFFF',
+    color: '#7B8099',
     fontSize: '18px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.15s',
+    boxShadow: '0 1px 6px rgba(100,110,180,0.08)',
   },
   fcNavBtnDisabled: {
-    opacity: 0.2,
+    opacity: 0.3,
     cursor: 'not-allowed',
   },
   fcCard: {
@@ -689,8 +698,8 @@ const styles = {
   fcFront: {
     position: 'absolute',
     inset: 0,
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#FFFFFF',
+    border: '1.5px solid #E8EAF6',
     borderRadius: '16px',
     padding: '32px',
     display: 'flex',
@@ -700,12 +709,13 @@ const styles = {
     textAlign: 'center',
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
+    boxShadow: '0 4px 20px rgba(100,110,180,0.10)',
   },
   fcBack: {
     position: 'absolute',
     inset: 0,
-    background: '#1e1e2e',
-    border: '1px solid rgba(99,102,241,0.35)',
+    background: 'linear-gradient(135deg, #EEF0FB 0%, #E8F4FD 100%)',
+    border: '1.5px solid rgba(121,134,203,0.3)',
     borderRadius: '16px',
     padding: '32px',
     display: 'flex',
@@ -716,12 +726,13 @@ const styles = {
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
     transform: 'rotateY(180deg)',
+    boxShadow: '0 4px 20px rgba(100,110,180,0.10)',
   },
   fcSideLabel: {
     fontSize: '10px',
     fontWeight: 700,
     letterSpacing: '0.12em',
-    color: '#444',
+    color: '#9199B0',
     marginBottom: '16px',
     display: 'block',
   },
@@ -729,13 +740,13 @@ const styles = {
     margin: 0,
     fontSize: '17px',
     fontWeight: 500,
-    color: '#e0e0e0',
+    color: '#3D405B',
     lineHeight: 1.55,
   },
   fcHint: {
     margin: 0,
     fontSize: '12px',
-    color: '#3a3a3a',
+    color: '#B0B4C8',
   },
   fcDots: {
     display: 'flex',
@@ -749,12 +760,12 @@ const styles = {
     height: '8px',
     borderRadius: '50%',
     border: 'none',
-    background: '#2e2e2e',
+    background: '#DDE0F0',
     cursor: 'pointer',
     padding: 0,
     transition: 'background 0.15s',
   },
   fcDotActive: {
-    background: '#6366f1',
+    background: '#7986CB',
   },
 }
