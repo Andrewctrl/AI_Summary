@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link, useLocation } from 'react-router-dom'
 import { db } from '../db'
 
@@ -196,7 +196,7 @@ function QuizView({ content, onRegenerate, regenLoading }) {
         </div>
         {onRegenerate && (
           <button onClick={onRegenerate} disabled={regenLoading} style={styles.regenBtn}>
-            {regenLoading ? '...' : '↻ New Quiz'}
+            {regenLoading ? 'Regenerating...' : '↻ New Quiz'}
           </button>
         )}
       </div>
@@ -264,16 +264,43 @@ function FlashcardsView({ content }) {
   const cards = content.cards ?? []
   const [index, setIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
+  const [slideDir, setSlideDir] = useState(null)
+  const [slideKey, setSlideKey] = useState(0)
 
-  const goTo = (i) => { setIndex(i); setIsFlipped(false) }
-  const prev = () => goTo(Math.max(0, index - 1))
-  const next = () => goTo(Math.min(cards.length - 1, index + 1))
+  const goTo = (i, dir) => {
+    setSlideDir(dir)
+    setSlideKey((k) => k + 1)
+    setIndex(i)
+    setIsFlipped(false)
+  }
+  const prev = () => { if (index > 0) goTo(index - 1, 'right') }
+  const next = () => { if (index < cards.length - 1) goTo(index + 1, 'left') }
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'ArrowLeft') prev()
+      else if (e.key === 'ArrowRight') next()
+      else if (e.key === ' ') { e.preventDefault(); setIsFlipped((f) => !f) }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [index, cards.length])
 
   const card = cards[index]
   if (!card) return null
 
+  const slideAnim = slideDir === 'left'
+    ? 'slideInFromRight 0.22s ease'
+    : slideDir === 'right'
+      ? 'slideInFromLeft 0.22s ease'
+      : undefined
+
   return (
     <div style={styles.fcWrap}>
+      <style>{`
+        @keyframes slideInFromRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInFromLeft  { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+      `}</style>
       <span style={styles.fcCounter}>{index + 1} / {cards.length}</span>
 
       <div style={styles.fcRow}>
@@ -283,7 +310,7 @@ function FlashcardsView({ content }) {
           style={{ ...styles.fcNavBtn, ...(index === 0 ? styles.fcNavBtnDisabled : {}) }}
         >←</button>
 
-        <div style={styles.fcCard} onClick={() => setIsFlipped(!isFlipped)}>
+        <div key={slideKey} style={{ ...styles.fcCard, animation: slideAnim }} onClick={() => setIsFlipped(!isFlipped)}>
           <div style={{ ...styles.fcInner, ...(isFlipped ? styles.fcFlipped : {}) }}>
             <div style={styles.fcFront}>
               <span style={styles.fcSideLabel}>QUESTION</span>
@@ -693,7 +720,7 @@ const styles = {
     transformStyle: 'preserve-3d',
   },
   fcFlipped: {
-    transform: 'rotateY(180deg)',
+    transform: 'rotateX(180deg)',
   },
   fcFront: {
     position: 'absolute',
@@ -725,7 +752,7 @@ const styles = {
     textAlign: 'center',
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
-    transform: 'rotateY(180deg)',
+    transform: 'rotateX(180deg)',
     boxShadow: '0 4px 20px rgba(100,110,180,0.10)',
   },
   fcSideLabel: {
