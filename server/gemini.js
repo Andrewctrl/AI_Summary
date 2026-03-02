@@ -7,7 +7,7 @@ const prompts = {
 Schema: { "type": "summary", "metadata": { "source_type": "mp4|image|txt|pdf", "title": "Auto-generated title" }, "tldr": "One sentence overview", "sections": [{ "heading": "...", "content": "..." }], "key_points": ["..."] }`,
 
   quiz: `Generate a quiz from this content. Return raw JSON only — no markdown, no code fences, no extra text.
-Schema: { "type": "quiz", "metadata": { "source_type": "mp4|image|txt|pdf", "title": "Auto-generated title" }, "questions": [{ "question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correct": "A", "explanation": "..." }] }`,
+Schema: { "type": "quiz", "metadata": { "source_type": "mp4|image|txt|pdf", "title": "Auto-generated title" }, "questions": [{ "question": "...", "options": ["A) ...", "B) ...", "C) ...", "D) ..."], "correct": "A", "explanation": "1-2 sentence explanation of why the correct answer is right.", "detail": "Thorough beginner-friendly explanation of the underlying concept. Explain why each wrong option is incorrect and what the correct answer really means." }] }`,
 
   flashcards: `Generate flashcards from this content. Return raw JSON only — no markdown, no code fences, no extra text.
 Schema: { "type": "flashcards", "metadata": { "source_type": "mp4|image|txt|pdf", "title": "Auto-generated title" }, "cards": [{ "front": "...", "back": "..." }] }`

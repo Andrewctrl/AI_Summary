@@ -11,6 +11,7 @@ export default function Chat() {
   const location = useLocation()
   const [activeType, setActiveType] = useState(location.state?.initialTab || 'summary')
   const [loading, setLoading] = useState(false)
+  const [regenLoading, setRegenLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const { data } = db.useQuery({
@@ -46,6 +47,28 @@ export default function Chat() {
       setError('Generation failed. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleRegenerate = async () => {
+    const existing = getOutput('quiz')
+    setRegenLoading(true)
+    setError(null)
+    try {
+      if (existing) await db.transact(db.tx.outputs[existing.id].delete())
+      const source = getOutput('summary') || getOutput('flashcards')
+      if (!source) return
+      const formData = new FormData()
+      formData.append('file', new Blob([JSON.stringify(source.content)], { type: 'text/plain' }), 'source.txt')
+      formData.append('outputType', 'quiz')
+      if (user?.id) formData.append('userId', user.id)
+      formData.append('chatId', id)
+      const res = await fetch('/api/generate', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error()
+    } catch {
+      setError('Regeneration failed. Please try again.')
+    } finally {
+      setRegenLoading(false)
     }
   }
 
@@ -92,7 +115,7 @@ export default function Chat() {
         {/* Content */}
         <div style={styles.content}>
           {getOutput(activeType)
-            ? <OutputView output={getOutput(activeType)} />
+            ? <OutputView output={getOutput(activeType)} onRegenerate={activeType === 'quiz' ? handleRegenerate : undefined} regenLoading={regenLoading} />
             : (
               <div style={styles.emptyState}>
                 <p style={styles.emptyText}>No {LABELS[activeType].toLowerCase()} yet.</p>
@@ -106,11 +129,11 @@ export default function Chat() {
   )
 }
 
-function OutputView({ output }) {
+function OutputView({ output, onRegenerate, regenLoading }) {
   const { type, content } = output
 
   if (type === 'summary') return <SummaryView content={content} />
-  if (type === 'quiz') return <QuizView content={content} />
+  if (type === 'quiz') return <QuizView content={content} onRegenerate={onRegenerate} regenLoading={regenLoading} />
   if (type === 'flashcards') return <FlashcardsView content={content} />
   return null
 }
@@ -148,8 +171,9 @@ function SummaryView({ content }) {
 }
 
 /* ── Quiz ── */
-function QuizView({ content }) {
+function QuizView({ content, onRegenerate, regenLoading }) {
   const [answers, setAnswers] = useState({})
+  const [detailed, setDetailed] = useState(false)
 
   const select = (qi, opt) => {
     if (answers[qi] !== undefined) return
@@ -162,6 +186,19 @@ function QuizView({ content }) {
 
   return (
     <div style={styles.quizWrap}>
+      {/* Toolbar */}
+      <div style={styles.quizToolbar}>
+        <div style={styles.modeToggle}>
+          <button onClick={() => setDetailed(false)} style={{ ...styles.modeBtn, ...(detailed ? {} : styles.modeBtnActive) }}>Regular</button>
+          <button onClick={() => setDetailed(true)} style={{ ...styles.modeBtn, ...(detailed ? styles.modeBtnActive : {}) }}>Detailed</button>
+        </div>
+        {onRegenerate && (
+          <button onClick={onRegenerate} disabled={regenLoading} style={styles.regenBtn}>
+            {regenLoading ? '...' : '↻ New Quiz'}
+          </button>
+        )}
+      </div>
+
       {Object.keys(answers).length === content.questions?.length && (
         <div style={styles.scoreBox}>
           <span style={styles.scoreText}>
@@ -208,7 +245,7 @@ function QuizView({ content }) {
             {chosen !== undefined && (
               <div style={{ ...styles.explanation, ...(isCorrect ? styles.explanationCorrect : styles.explanationWrong) }}>
                 <strong>{isCorrect ? 'Correct!' : `Correct answer: ${q.correct}`}</strong>
-                {q.explanation && <span> — {q.explanation}</span>}
+                <span> — {detailed && q.detail ? q.detail : q.explanation}</span>
               </div>
             )}
           </div>
@@ -442,6 +479,46 @@ const styles = {
   },
 
   /* Quiz */
+  quizToolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+  },
+  modeToggle: {
+    display: 'flex',
+    background: '#1a1a1a',
+    border: '1px solid #2a2a2a',
+    borderRadius: '999px',
+    padding: '3px',
+    gap: '2px',
+  },
+  modeBtn: {
+    padding: '5px 14px',
+    borderRadius: '999px',
+    border: 'none',
+    background: 'transparent',
+    color: '#666',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  modeBtnActive: {
+    background: '#2a2a2a',
+    color: '#e0e0e0',
+  },
+  regenBtn: {
+    padding: '6px 14px',
+    borderRadius: '999px',
+    border: '1px solid #2a2a2a',
+    background: '#1a1a1a',
+    color: '#aaa',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
   quizWrap: {
     display: 'flex',
     flexDirection: 'column',
