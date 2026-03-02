@@ -94,11 +94,11 @@ export default function Chat() {
               <button
                 key={type}
                 onClick={() => exists ? setActiveType(type) : handleGenerate(type)}
-                disabled={loading}
+                disabled={loading || regenLoading}
                 style={{
                   ...styles.tab,
                   ...(isActive && exists ? styles.tabActive : {}),
-                  ...(loading ? styles.tabDisabled : {}),
+                  ...((loading || regenLoading) ? styles.tabDisabled : {}),
                 }}
               >
                 {loading && activeType !== type && !exists
@@ -178,7 +178,7 @@ function QuizView({ content, onRegenerate, regenLoading }) {
   const [detailed, setDetailed] = useState(false)
 
   const select = (qi, opt) => {
-    if (answers[qi] !== undefined) return
+    if (answers[qi] !== undefined || regenLoading) return
     setAnswers((prev) => ({ ...prev, [qi]: opt }))
   }
 
@@ -201,6 +201,7 @@ function QuizView({ content, onRegenerate, regenLoading }) {
         )}
       </div>
 
+      <div style={regenLoading ? styles.quizFreezeOverlay : undefined}>
       {Object.keys(answers).length === content.questions?.length && (
         <div style={styles.scoreBox}>
           <span style={styles.scoreText}>
@@ -253,6 +254,7 @@ function QuizView({ content, onRegenerate, regenLoading }) {
           </div>
         )
       })}
+      </div>
     </div>
   )
 }
@@ -525,6 +527,11 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
+  },
+  quizFreezeOverlay: {
+    opacity: 0.4,
+    pointerEvents: 'none',
+    userSelect: 'none',
   },
   scoreBox: {
     padding: '12px 20px',
