@@ -37,6 +37,7 @@ export default function Home() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const [confirmId, setConfirmId] = useState(null)
+  const [page, setPage] = useState(0)
   const fileInputRef = useRef(null)
 
   const handleLogout = async () => {
@@ -49,11 +50,16 @@ export default function Home() {
       $: {
         where: { '$user.id': user.id },
         order: { createdAt: 'desc' },
-        limit: 5,
+        limit: 6,           // fetch one extra to detect next page
+        offset: page * 5,
       },
       outputs: {},
     },
   })
+
+  const chats = data?.chats?.slice(0, 5) ?? []
+  const hasNext = (data?.chats?.length ?? 0) > 5
+  const hasPrev = page > 0
 
   const handleDelete = (e, chat) => {
     e.stopPropagation()
@@ -200,11 +206,11 @@ export default function Home() {
         {/* Past sessions */}
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>Recent sessions</h2>
-          {data?.chats?.length === 0 && (
+          {chats.length === 0 && page === 0 && (
             <p style={styles.empty}>No sessions yet. Upload a file to get started.</p>
           )}
           <div style={styles.sessionList}>
-            {data?.chats?.map((chat) => {
+            {chats.map((chat) => {
               const confirming = confirmId === chat.id
               return (
                 <div
@@ -238,6 +244,26 @@ export default function Home() {
               )
             })}
           </div>
+
+          {(hasPrev || hasNext) && (
+            <div style={styles.pagination}>
+              <button
+                onClick={() => setPage(p => p - 1)}
+                disabled={!hasPrev}
+                style={{ ...styles.pageBtn, ...(!hasPrev ? styles.pageBtnDisabled : {}) }}
+              >
+                ← Prev
+              </button>
+              <span style={styles.pageNum}>Page {page + 1}</span>
+              <button
+                onClick={() => setPage(p => p + 1)}
+                disabled={!hasNext}
+                style={{ ...styles.pageBtn, ...(!hasNext ? styles.pageBtnDisabled : {}) }}
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -536,5 +562,30 @@ const styles = {
     fontSize: '12px',
     fontWeight: 600,
     cursor: 'pointer',
+  },
+  pagination: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: '8px',
+  },
+  pageBtn: {
+    padding: '6px 14px',
+    borderRadius: '999px',
+    border: '1px solid #2a2a2a',
+    background: '#1a1a1a',
+    color: '#aaa',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+  },
+  pageBtnDisabled: {
+    opacity: 0.3,
+    cursor: 'not-allowed',
+  },
+  pageNum: {
+    fontSize: '13px',
+    color: '#555',
   },
 }
