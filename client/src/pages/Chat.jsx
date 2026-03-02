@@ -65,6 +65,7 @@ export default function Chat() {
       formData.append('chatId', id)
       const res = await fetch('/api/generate', { method: 'POST', body: formData })
       if (!res.ok) throw new Error()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch {
       setError('Regeneration failed. Please try again.')
     } finally {
@@ -115,7 +116,7 @@ export default function Chat() {
         {/* Content */}
         <div style={styles.content}>
           {getOutput(activeType)
-            ? <OutputView output={getOutput(activeType)} onRegenerate={activeType === 'quiz' ? handleRegenerate : undefined} regenLoading={regenLoading} />
+            ? <OutputView key={getOutput(activeType).id} output={getOutput(activeType)} onRegenerate={activeType === 'quiz' ? handleRegenerate : undefined} regenLoading={regenLoading} />
             : (
               <div style={styles.emptyState}>
                 <p style={styles.emptyText}>No {LABELS[activeType].toLowerCase()} yet.</p>
