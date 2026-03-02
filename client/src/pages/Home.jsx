@@ -39,6 +39,11 @@ export default function Home() {
   const [confirmId, setConfirmId] = useState(null)
   const fileInputRef = useRef(null)
 
+  const handleLogout = async () => {
+    await db.auth.signOut()
+    navigate('/login')
+  }
+
   const { data } = db.useQuery({
     chats: {
       $: {
@@ -107,8 +112,11 @@ export default function Home() {
       <div style={styles.container}>
         {/* Header */}
         <div style={styles.header}>
-          <h1 style={styles.title}>Notes AI</h1>
-          <p style={styles.subtitle}>Upload a file and get instant summaries, quizzes, or flashcards</p>
+          <div>
+            <h1 style={styles.title}>Notes AI</h1>
+            <p style={styles.subtitle}>Upload a file and get instant summaries, quizzes, or flashcards</p>
+          </div>
+          <button onClick={handleLogout} style={styles.logoutBtn}>Log out</button>
         </div>
 
         {/* Upload card */}
@@ -250,7 +258,22 @@ const styles = {
     gap: '32px',
   },
   header: {
-    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    textAlign: 'left',
+  },
+  logoutBtn: {
+    flexShrink: 0,
+    padding: '6px 14px',
+    borderRadius: '999px',
+    border: '1px solid #2a2a2a',
+    background: 'transparent',
+    color: '#666',
+    fontSize: '13px',
+    fontWeight: 500,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
   },
   title: {
     margin: '0 0 8px',
