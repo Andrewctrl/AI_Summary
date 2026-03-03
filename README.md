@@ -2,7 +2,7 @@
 
 An AI study tool which transforms lecture material into summaries, quizzes, and flashcards.
 
-**Live Site:** https://aisummary-production.up.railway.app
+**Live Site:** https://cramly.up.railway.app/
 
 ---
 
