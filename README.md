@@ -42,7 +42,7 @@ Upload a PDF, image, audio, or video file and Cramly can:
 
 ## Architecture
 
-![Cramly System Design](Cramly_design.png)
+![Cramly System Design](System_design.png)
 
 ### Work Flow 
 
